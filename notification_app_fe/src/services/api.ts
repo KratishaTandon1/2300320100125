@@ -1,16 +1,13 @@
 import { Log, setAuthToken } from 'logging-middleware';
-
 export interface Notification {
   ID: string;
   Type: 'Event' | 'Result' | 'Placement';
   Message: string;
   Timestamp: string;
 }
-
 const API_URL = '/api/proxy/evaluation-service/notifications';
 const AUTH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiYXVkIjoiaHR0cDovLzIwLjI0NC41Ni4xNDQvZXZhbHVhdGlvbi1zZXJ2aWNlIiwiZW1haWwiOiJrcmF0aXNoYS4yM2IwMTAxMjkzQGFiZXMuYWMuaW4iLCJleHAiOjE3ODA5OTAyMTMsImlhdCI6MTc4MDk4OTMxMywiaXNzIjoiQWZmb3JkIE1lZGljYWwgVGVjaG5vbG9naWVzIFByaXZhdGUgTGltaXRlZCIsImp0aSI6IjA4MzEyZDg5LWFhMTktNGJkOS04ODE5LTFmMWNiYTY5YmZjMCIsImxvY2FsZSI6ImVuLUlOIiwibmFtZSI6ImtyYXRpc2hhIHRhbmRvbiIsInN1YiI6ImFmMzQwNDRiLTEyOGUtNGNmOC1hY2JjLWQzMmMwYzY4MDIzOSJ9LCJlbWFpbCI6ImtyYXRpc2hhLjIzYjAxMDEyOTNAYWJlcy5hYy5pbiIsIm5hbWUiOiJrcmF0aXNoYSB0YW5kb24iLCJyb2xsTm8iOiIyM2IwMTAxMjkzIiwiYWNjZXNzQ29kZSI6ImNYdXFodCIsImNsaWVudElEIjoiYWYzNDA0NGItMTI4ZS00Y2Y4LWFjYmMtZDMyYzBjNjgwMjM5IiwiY2xpZW50U2VjcmV0IjoiVWRicGpwTnRQeHNiU3lydiJ9.6GZFJXEt7TNo2u4zmqq735Fjrnkr2iiC66Uz-r-a-Iw';
 setAuthToken(AUTH_TOKEN); 
-
 const MOCK_DATA: Notification[] = [
   { "ID": "d146095a-0d86-4a34-9e69-3900a14576bc", "Type": "Result", "Message": "mid-sem", "Timestamp": "2026-04-22 17:51:30" },
   { "ID": "b283218f-ca5a-4b7c-93a9-1f2f240d64b0", "Type": "Placement", "Message": "CSX Corporation hiring", "Timestamp": "2026-04-22 17:51:18" },
@@ -23,7 +20,6 @@ const MOCK_DATA: Notification[] = [
   { "ID": "cf2885a6-45ac-4ba0-b548-6e9e9d4c52c8", "Type": "Result", "Message": "project-review", "Timestamp": "2026-04-22 17:49:54" },
   { "ID": "0a7412bd-6065-4d09-8501-a37f11cc848b", "Type": "Placement", "Message": "Advanced Micro Devices Inc. hiring", "Timestamp": "2026-04-22 17:49:42" }
 ];
-
 export async function fetchNotifications(params?: { limit?: number, page?: number, notification_type?: string }): Promise<Notification[]> {
   try {
     let url = API_URL;
@@ -34,52 +30,42 @@ export async function fetchNotifications(params?: { limit?: number, page?: numbe
       if (params.notification_type) query.append('notification_type', params.notification_type);
       url += `?${query.toString()}`;
     }
-
     const res = await fetch(url, {
       headers: {
         'Authorization': `Bearer ${AUTH_TOKEN}`
       }
     });
-
     if (!res.ok) {
       throw new Error(`API Error: ${res.status}`);
     }
-
     const data = await res.json();
     return data.notifications || data;
   } catch (err: any) {
     await Log("frontend", "error", "api", `Failed to fetch notifications: ${err.message}`);
-    
     let filtered = [...MOCK_DATA];
     if (params?.notification_type) {
       filtered = filtered.filter(n => n.Type.toLowerCase() === params.notification_type!.toLowerCase());
     }
-    
     filtered.sort((a, b) => new Date(b.Timestamp).getTime() - new Date(a.Timestamp).getTime());
-
     if (params?.limit) {
       const page = params.page || 1;
       const start = (page - 1) * params.limit;
       filtered = filtered.slice(start, start + params.limit);
     }
-    
     return filtered;
   }
 }
-
 export function getPriorityInbox(notifications: Notification[], limit: number = 10): Notification[] {
   const weightMap: Record<string, number> = {
     'Placement': 3,
     'Result': 2,
     'Event': 1
   };
-
   const sorted = [...notifications].sort((a, b) => {
     const wA = weightMap[a.Type] || 0;
     const wB = weightMap[b.Type] || 0;
     if (wB !== wA) return wB - wA;
     return new Date(b.Timestamp).getTime() - new Date(a.Timestamp).getTime();
   });
-
   return sorted.slice(0, limit);
 }

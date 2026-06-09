@@ -14,3 +14,5 @@ A Next.js frontend for campus announcements with a priority inbox and custom log
 - **Custom Logging Middleware**: Intercepts errors and sends them to the backend API asynchronously without breaking the app.
 - **Proxy Route**: Used Next.js API routes to securely proxy requests to the evaluation server and bypass CORS.
 - **Dark Mode UI**: Designed a clean and responsive interface for the notifications.
+
+

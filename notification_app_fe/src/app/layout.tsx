@@ -3,14 +3,11 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
 import ThemeRegistry from "@/components/ThemeRegistry";
-
 const inter = Inter({ subsets: ["latin"] });
-
 export const metadata: Metadata = {
   title: "Campus Notifications",
   description: "Real-time updates regarding Placements, Events, and Results",
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
