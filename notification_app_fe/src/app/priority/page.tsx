@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Typography, Box, CircularProgress, Alert } from '@mui/material';
 import { fetchNotifications, getPriorityInbox, Notification } from '@/services/api';
 import NotificationCard from '@/components/NotificationCard';
+import { Log } from 'logging-middleware';
 
 export default function PriorityInboxPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -38,8 +39,10 @@ export default function PriorityInboxPage() {
         
         const priorityTop10 = getPriorityInbox(unreadData, 10);
         setNotifications(priorityTop10);
+        await Log("frontend", "info", "page", `Loaded Priority Inbox with ${priorityTop10.length} items`);
       } catch (err: any) {
         setError(err.message || 'Failed to load notifications');
+        await Log("frontend", "error", "page", `Priority fetch error: ${err.message}`);
       } finally {
         setLoading(false);
       }

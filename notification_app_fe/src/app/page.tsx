@@ -1,9 +1,9 @@
 "use client";
-
 import React, { useEffect, useState } from 'react';
 import { Typography, Box, Select, MenuItem, FormControl, InputLabel, CircularProgress, Alert } from '@mui/material';
 import { fetchNotifications, Notification } from '@/services/api';
 import NotificationCard from '@/components/NotificationCard';
+import { Log } from 'logging-middleware';
 
 export default function AllNotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -27,8 +27,10 @@ export default function AllNotificationsPage() {
         const params = filter !== 'All' ? { notification_type: filter } : {};
         const data = await fetchNotifications(params);
         setNotifications(data);
+        await Log("frontend", "info", "page", `Fetched ${data.length} notifications`);
       } catch (err: any) {
         setError(err.message || 'Failed to load notifications');
+        await Log("frontend", "error", "page", `Failed to load notifications: ${err.message}`);
       } finally {
         setLoading(false);
       }

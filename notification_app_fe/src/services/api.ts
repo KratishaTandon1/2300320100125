@@ -1,3 +1,5 @@
+import { Log } from 'logging-middleware';
+
 export interface Notification {
   ID: string;
   Type: 'Event' | 'Result' | 'Placement';
@@ -44,8 +46,8 @@ export async function fetchNotifications(params?: { limit?: number, page?: numbe
 
     const data = await res.json();
     return data.notifications || data;
-  } catch (err) {
-    console.warn("Falling back to mock data due to error:", err);
+  } catch (err: any) {
+    await Log("frontend", "error", "api", `Failed to fetch notifications: ${err.message}`);
     
     // Process mock data to simulate server-side filtering
     let filtered = [...MOCK_DATA];
