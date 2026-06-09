@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
-import { ThemeProvider } from "@mui/material/styles";
-import { CssBaseline } from "@mui/material";
+import ThemeRegistry from "@/components/ThemeRegistry";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,11 +18,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className} style={{ margin: 0, padding: 0, backgroundColor: '#f5f7fa', minHeight: '100vh' }}>
-        <Navigation />
-        <main style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
-          {children}
-        </main>
+      <body className={inter.className}>
+        <ThemeRegistry>
+          <Navigation />
+          <main style={{ padding: '32px 16px', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
+            {children}
+          </main>
+        </ThemeRegistry>
       </body>
     </html>
   );

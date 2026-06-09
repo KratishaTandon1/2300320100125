@@ -1,4 +1,4 @@
-import { Log } from 'logging-middleware';
+import { Log, setAuthToken } from 'logging-middleware';
 
 export interface Notification {
   ID: string;
@@ -7,8 +7,9 @@ export interface Notification {
   Timestamp: string;
 }
 
-const API_URL = 'http://4.224.186.213/evaluation-service/notifications';
-const ACCESS_CODE = 'cXuqht'; 
+const API_URL = '/api/proxy/evaluation-service/notifications';
+const AUTH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiYXVkIjoiaHR0cDovLzIwLjI0NC41Ni4xNDQvZXZhbHVhdGlvbi1zZXJ2aWNlIiwiZW1haWwiOiJrcmF0aXNoYS4yM2IwMTAxMjkzQGFiZXMuYWMuaW4iLCJleHAiOjE3ODA5OTAyMTMsImlhdCI6MTc4MDk4OTMxMywiaXNzIjoiQWZmb3JkIE1lZGljYWwgVGVjaG5vbG9naWVzIFByaXZhdGUgTGltaXRlZCIsImp0aSI6IjA4MzEyZDg5LWFhMTktNGJkOS04ODE5LTFmMWNiYTY5YmZjMCIsImxvY2FsZSI6ImVuLUlOIiwibmFtZSI6ImtyYXRpc2hhIHRhbmRvbiIsInN1YiI6ImFmMzQwNDRiLTEyOGUtNGNmOC1hY2JjLWQzMmMwYzY4MDIzOSJ9LCJlbWFpbCI6ImtyYXRpc2hhLjIzYjAxMDEyOTNAYWJlcy5hYy5pbiIsIm5hbWUiOiJrcmF0aXNoYSB0YW5kb24iLCJyb2xsTm8iOiIyM2IwMTAxMjkzIiwiYWNjZXNzQ29kZSI6ImNYdXFodCIsImNsaWVudElEIjoiYWYzNDA0NGItMTI4ZS00Y2Y4LWFjYmMtZDMyYzBjNjgwMjM5IiwiY2xpZW50U2VjcmV0IjoiVWRicGpwTnRQeHNiU3lydiJ9.6GZFJXEt7TNo2u4zmqq735Fjrnkr2iiC66Uz-r-a-Iw';
+setAuthToken(AUTH_TOKEN); 
 
 const MOCK_DATA: Notification[] = [
   { "ID": "d146095a-0d86-4a34-9e69-3900a14576bc", "Type": "Result", "Message": "mid-sem", "Timestamp": "2026-04-22 17:51:30" },
@@ -36,7 +37,7 @@ export async function fetchNotifications(params?: { limit?: number, page?: numbe
 
     const res = await fetch(url, {
       headers: {
-        'Authorization': `Bearer ${ACCESS_CODE}`
+        'Authorization': `Bearer ${AUTH_TOKEN}`
       }
     });
 
@@ -49,16 +50,13 @@ export async function fetchNotifications(params?: { limit?: number, page?: numbe
   } catch (err: any) {
     await Log("frontend", "error", "api", `Failed to fetch notifications: ${err.message}`);
     
-    // Process mock data to simulate server-side filtering
     let filtered = [...MOCK_DATA];
     if (params?.notification_type) {
       filtered = filtered.filter(n => n.Type.toLowerCase() === params.notification_type!.toLowerCase());
     }
     
-    // Sort mock data by time descending (newest first)
     filtered.sort((a, b) => new Date(b.Timestamp).getTime() - new Date(a.Timestamp).getTime());
 
-    // Apply pagination
     if (params?.limit) {
       const page = params.page || 1;
       const start = (page - 1) * params.limit;
