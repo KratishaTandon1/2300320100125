@@ -1,0 +1,10 @@
+{
+  "name": "logging-middleware",
+  "version": "1.0.0",
+  "description": "Campus Notifications Logging Middleware",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "node-fetch": "^2.7.0"
+  }
+}
